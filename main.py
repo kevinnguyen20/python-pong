@@ -33,7 +33,9 @@ ball_=ball.Ball()
 pen_=pen.Pen()
 
 # Border checking
-def greater_than_x(score_player1,score_player2,ball,pen):
+def greater_than_x(ball,pen):
+    global score_player1
+    global score_player2
     if ball.ball.xcor()>390:
         ball.ball.goto(0,0)
         ball.ball.dx*=-1
@@ -41,7 +43,9 @@ def greater_than_x(score_player1,score_player2,ball,pen):
         pen.pen.clear()
         pen.pen.write("Player A: {}  Player B: {}".format(score_player1, score_player2),align="center",font=("Courier", 24, "normal"))
 
-def smaller_than_x(score_player1,score_player2,ball,pen):
+def smaller_than_x(ball,pen):
+    global score_player1
+    global score_player2
     if ball.ball.xcor()<-390:
         ball.ball.goto(0,0)
         ball.ball.dx*=-1
@@ -49,9 +53,9 @@ def smaller_than_x(score_player1,score_player2,ball,pen):
         pen.pen.clear()
         pen.pen.write("Player A: {}  Player B: {}".format(score_player1, score_player2),align="center",font=("Courier", 24, "normal"))
 
-def check_border_x(score_player1,score_player2,ball,pen):
-    greater_than_x(score_player1,score_player2,ball,pen)
-    smaller_than_x(score_player1,score_player2,ball,pen)
+def check_border_x(ball,pen):
+    greater_than_x(ball,pen)
+    smaller_than_x(ball,pen)
 
 def greater_than_y(ball):
     if ball.ball.ycor()>290:
@@ -69,8 +73,8 @@ def check_border_y(ball):
     greater_than_y(ball)
     smaller_than_y(ball)
 
-def check_border(score_player1,score_player2,ball,pen):
-    check_border_x(score_player1,score_player2,ball,pen)
+def check_border(ball,pen):
+    check_border_x(ball,pen)
     check_border_y(ball)
 
 # Paddle and ball collision
@@ -94,7 +98,7 @@ while True:
     ball_.move()
 
     # Check border
-    check_border(score_player1,score_player2,ball_,pen_)
+    check_border(ball_,pen_)
 
     # Check collision ball and paddle
     collision_paddle_player1(paddle_player1,ball_)
