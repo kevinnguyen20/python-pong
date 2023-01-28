@@ -1,72 +1,91 @@
 import turtle
 import winsound
-
-import paddle
-import ball
-import pen
-
-wn = turtle.Screen()
-wn.title("Pong")
-wn.bgcolor("black")
-wn.setup(width=800, height=600)
-wn.tracer(0)
-
-# Score
-score_player1 = 0
-score_player2 = 0
+from functools import partial
 
 # Paddles
-paddle_player1=paddle.Paddle(-350)
-paddle_player2=paddle.Paddle(350)
+def init_paddle(x_pos):
+    paddle=turtle.Turtle()
+    paddle.speed(0)
+    paddle.shape("square")
+    paddle.color("white")
+    paddle.shapesize(stretch_wid=5,stretch_len=1)
+    paddle.penup()
+    paddle.goto(x_pos,0)
+    
+    return paddle
 
-# Keyboard binding
-wn.listen()
-wn.onkeypress(paddle_player1.paddle_up,"w")
-wn.onkeypress(paddle_player1.paddle_down,"s")
-wn.onkeypress(paddle_player2.paddle_up,"Up")
-wn.onkeypress(paddle_player2.paddle_down,"Down")
+def paddle_up(paddle):
+    y=paddle.ycor()
+    y+=20
+    paddle.sety(y)
+
+def paddle_down(paddle):
+    y=paddle.ycor()
+    y-=20
+    paddle.sety(y)
 
 # Ball
-ball_=ball.Ball()
+def init_ball():
+    ball=turtle.Turtle()
+    ball.speed(0)
+    ball.shape("square")
+    ball.color("white")
+    ball.penup()
+    ball.goto(0,0)
+    ball.dx=0.1
+    ball.dy=0.1
+
+    return ball
+
+def move(ball):
+    ball.setx(ball.xcor()+ball.dx)
+    ball.sety(ball.ycor()+ball.dy)
 
 # Pen
-pen_=pen.Pen()
+def init_pen():
+    pen = turtle.Turtle()
+    pen.speed(0)
+    pen.color("white")
+    pen.penup()
+    pen.hideturtle()
+    pen.goto(0, 260)
+    pen.player1=0
+    pen.player2=0
+    pen.write("Player A: {}  Player B: {}".format(pen.player1,pen.player2), align="center", font=("Courier", 24, "normal"))
+
+    return pen
 
 # Border checking
 def greater_than_x(ball,pen):
-    global score_player1
-    global score_player2
-    if ball.ball.xcor()>390:
-        ball.ball.goto(0,0)
-        ball.ball.dx*=-1
-        score_player1+=1
-        pen.pen.clear()
-        pen.pen.write("Player A: {}  Player B: {}".format(score_player1, score_player2),align="center",font=("Courier", 24, "normal"))
+    if ball.xcor()>390:
+        ball.goto(0,0)
+        ball.dx*=-1
+        pen.player1+=1
+        pen.clear()
+        pen.write("Player A: {}  Player B: {}".format(pen.player1,pen.player2),align="center",font=("Courier", 24, "normal"))
 
 def smaller_than_x(ball,pen):
-    global score_player1
-    global score_player2
-    if ball.ball.xcor()<-390:
-        ball.ball.goto(0,0)
-        ball.ball.dx*=-1
-        score_player2+=1
-        pen.pen.clear()
-        pen.pen.write("Player A: {}  Player B: {}".format(score_player1, score_player2),align="center",font=("Courier", 24, "normal"))
+    if ball.xcor()<-390:
+        ball.goto(0,0)
+        ball.dx*=-1
+        pen.player2+=1
+        pen.clear()
+        pen.write("Player A: {}  Player B: {}".format(pen.player1,pen.player2),align="center",font=("Courier", 24, "normal"))
 
 def check_border_x(ball,pen):
     greater_than_x(ball,pen)
     smaller_than_x(ball,pen)
 
 def greater_than_y(ball):
-    if ball.ball.ycor()>290:
-        ball.ball.sety(290)
-        ball.ball.dy*=-1
+    if ball.ycor()>290:
+        ball.sety(290)
+        ball.dy*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
 
 def smaller_than_y(ball):
-    if ball.ball.ycor()<-290:
-        ball.ball.sety(-290)
-        ball.ball.dy*=-1
+    if ball.ycor()<-290:
+        ball.sety(-290)
+        ball.dy*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
 
 def check_border_y(ball):
@@ -79,27 +98,66 @@ def check_border(ball,pen):
 
 # Paddle and ball collision
 def collision_paddle_player1(paddle,ball):
-    if (ball.ball.xcor()<-340 and ball.ball.xcor()>-350) and (ball.ball.ycor()<paddle.paddle.ycor()+40 and ball.ball.ycor()>paddle.paddle.ycor()-40):
-        ball.ball.setx(-340)
-        ball.ball.dx*=-1
+    if (ball.xcor()<-340 and ball.xcor()>-350) and (ball.ycor()<paddle.ycor()+40 and ball.ycor()>paddle.ycor()-40):
+        ball.setx(-340)
+        ball.dx*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
 
 def collision_paddle_player2(paddle,ball):
-    if (ball.ball.xcor()>340 and ball.ball.xcor()<350) and (ball.ball.ycor()<paddle.paddle.ycor()+40 and ball.ball.ycor()>paddle.paddle.ycor()-40):
-        ball.ball.setx(340)
-        ball.ball.dx*=-1
+    if (ball.xcor()>340 and ball.xcor()<350) and (ball.ycor()<paddle.ycor()+40 and ball.ycor()>paddle.ycor()-40):
+        ball.setx(340)
+        ball.dx*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
 
 # Main game loop
-while True:
-    wn.update()
+def mainloop(wn,paddle_player1,paddle_player2,ball,pen):
+    while True:
+        wn.update()
 
-    # Move the ball
-    ball_.move()
+        # Move the ball
+        move(ball)
 
-    # Check border
-    check_border(ball_,pen_)
+        # Check border
+        check_border(ball,pen)
 
-    # Check collision ball and paddle
-    collision_paddle_player1(paddle_player1,ball_)
-    collision_paddle_player2(paddle_player2,ball_)
+        # Check collision ball and paddle
+        collision_paddle_player1(paddle_player1,ball)
+        collision_paddle_player2(paddle_player2,ball)
+
+def close(wn):
+    wn.bye()
+
+def main():
+    wn=turtle.Screen()
+    wn.title("Pong")
+    wn.bgcolor("black")
+    wn.setup(width=800, height=600)
+    wn.tracer(0)
+
+    # Initialization
+    paddle_player1=init_paddle(-350)
+    paddle_player2=init_paddle(350)
+    ball=init_ball()
+    pen=init_pen()
+
+    # Keyboard binding
+    wn.listen()
+
+    func1=partial(paddle_up,paddle_player1)
+    func2=partial(paddle_down,paddle_player1)
+    func3=partial(paddle_up,paddle_player2)
+    func4=partial(paddle_down,paddle_player2)
+    wn.onkeypress(func1,"w")
+    wn.onkeypress(func2,"s")
+    wn.onkeypress(func3,"Up")
+    wn.onkeypress(func4,"Down")
+
+    # Close window
+    func=partial(close,wn)
+    wn.onkeypress(func, "Escape")
+
+    # Game mainloop
+    mainloop(wn,paddle_player1,paddle_player2,ball,pen)
+
+if __name__ == "__main__":
+    main()
