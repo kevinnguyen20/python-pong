@@ -1,6 +1,8 @@
+import math
 import turtle
 import winsound
 from functools import partial
+import random
 
 # Paddles
 def init_paddle(x_pos):
@@ -100,12 +102,15 @@ def check_border(ball,pen):
 def collision_paddle_player1(paddle,ball):
     if (ball.xcor()<-340 and ball.xcor()>-350) and (ball.ycor()<paddle.ycor()+40 and ball.ycor()>paddle.ycor()-40):
         ball.setx(-340)
+        ball.dy=math.copysign(random.random()/20 + 0.075,ball.dy)
         ball.dx*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
 
 def collision_paddle_player2(paddle,ball):
     if (ball.xcor()>340 and ball.xcor()<350) and (ball.ycor()<paddle.ycor()+40 and ball.ycor()>paddle.ycor()-40):
+        
         ball.setx(340)
+        ball.dy=math.copysign(random.random()/20 + 0.075,ball.dy)
         ball.dx*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
 
