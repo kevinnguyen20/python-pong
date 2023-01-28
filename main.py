@@ -1,4 +1,5 @@
 import math
+from time import sleep
 import turtle
 import winsound
 from functools import partial
@@ -108,11 +109,32 @@ def collision_paddle_player1(paddle,ball):
 
 def collision_paddle_player2(paddle,ball):
     if (ball.xcor()>340 and ball.xcor()<350) and (ball.ycor()<paddle.ycor()+40 and ball.ycor()>paddle.ycor()-40):
-        
+
         ball.setx(340)
         ball.dy=math.copysign(random.random()/20 + 0.075,ball.dy)
         ball.dx*=-1
         winsound.PlaySound("bounce.wav",winsound.SND_ASYNC)
+
+def print_winner(pen,winner):
+    pen.write("Player {} wins!".format(winner),align="center",font=("Courier", 48, "normal"))
+
+def print_draw(pen):
+    pen.write("Draw!",align="center",font=("Courier", 48, "normal"))
+
+def get_winner(pen):
+    pen.clear()
+    pen.goto(0,0)
+    if pen.player1>pen.player2:
+        print_winner(pen,1)
+    elif pen.player2>pen.player1:
+        print_winner(pen,2)
+    else:
+        print_draw(pen)
+
+def close(wn,pen):
+    get_winner(pen)
+    sleep(5)
+    wn.bye()
 
 # Main game loop
 def mainloop(wn,paddle_player1,paddle_player2,ball,pen):
@@ -128,9 +150,6 @@ def mainloop(wn,paddle_player1,paddle_player2,ball,pen):
         # Check collision ball and paddle
         collision_paddle_player1(paddle_player1,ball)
         collision_paddle_player2(paddle_player2,ball)
-
-def close(wn):
-    wn.bye()
 
 def main():
     wn=turtle.Screen()
@@ -158,7 +177,7 @@ def main():
     wn.onkeypress(func4,"Down")
 
     # Close window
-    func=partial(close,wn)
+    func=partial(close,wn,pen)
     wn.onkeypress(func, "Escape")
 
     # Game mainloop
